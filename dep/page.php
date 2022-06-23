@@ -10,29 +10,36 @@
   <?php
   require_once 'server.php';
   require_once 'department.php';
+  /*
+  $id = $_GET['id'];
+  $sql = "SELECT `id`, `name`, `address`, `phone`, `email` FROM `departments` WHERE `id`=$id";
+  $result = $conn->query($sql);
+  */
 
+  $stm = $conn->prepare('SELECT `id`, `name`, `address`, `phone`, `email` FROM `departments` WHERE `id`=?');
+  $stm->bind_param('d', $id);
   $id = $_GET['id'];
 
-  $sql = "SELECT `id`, `name`, `address`, `phone`, `email` FROM `departments` WHERE `id`=" . $id . ';';
-
-  $result = $conn->query($sql);
+  $stm->execute();
+  $result = $stm->get_result();
 
   if($result && $result->num_rows > 0){
     // var_dump($result);
-    $row = $result->fetch_assoc();
+    $current_dep = $result->fetch_assoc();
+    $department = new Department($current_dep['name'], $current_dep['address'], $current_dep['phone'], $current_dep['email']);
     // var_dump($row);
    
   }elseif($result){
-    echo '0 risultati';
+    echo 'Nessun risultato';
   }else{
     echo 'Errore';
   }
   ?>
 
-  <h1><?php echo $row['name']; ?></h1>
-  <h3><?php echo $row['address']; ?></h3>
+  <h1><?php echo $department->name; ?></h1>
+  <h3><?php echo $department->address; ?></h3>
 
-  <p>Numero di telefono: <?php echo $row['phone']; ?></p>
-  <p>Email: <?php echo $row['email']; ?></p>
+  <p>Numero di telefono: <?php echo $department->phone; ?></p>
+  <p>Email: <?php echo $department->email; ?></p>
 </body>
 </html>
